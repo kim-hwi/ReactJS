@@ -1,0 +1,402 @@
+<html>
+
+<head>
+
+<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+<script type="text/javascript" src="gl-matrix.js"> </script>
+<script type="text/javascript" src="script.js"> </script>
+<title>Rotate,Translate,scale study</title>
+
+</head>
+
+<body onload="main()">
+    <div>
+        <h1 class="title">Rotate, Translate, scale study</h1>
+<br><br>Hello! Rotate, transrate, and scale are very important factors in graphics.
+<br> In webgl, Rotate, Translate, and Scale are treated as matrices. 
+<br>This method is very advantageous when calculating vertex coordinates using the associative law of a matrix.
+<br><br> matrix (AB)C == A(BC)     
+<br><br>
+<br>However, since the matrix is notcommutative, you need to pay attention to the order. 
+<br><br> matrix AB != BA
+<br><br>
+<br>Therefore, we would like to learn about the calculation results according to the order.
+<br>So, we will practice basic Rotate, Translator, and Scale, and study special cases.
+    
+<br><br> Before we get started, let's take a look at the features of handling tools.
+        <br>
+        <br>First, you can zoom in and out the screen by using the FOV function.
+        <br>Second, X,Y,Z-VIEW is a function to change the viewpoint using viewmetrics. Use it when observing
+        movement of a
+        <br>Finally, there are function such as toggle animation, rotate speed up and down, and drawarray mode
+        select.
+        <br>
+    <br>
+    <br>
+    </div>
+    
+    <canvas id="canvas" style="border: none;" width="800" height="600"></canvas>
+	<br>X-axis = RED, Y-axis = GREEN, Z-axis = BLUE,
+	<br/> <br/>
+<button onclick="toggleAnimation()">Toggle Animation</button>
+<button onclick="speed_scale(1.1)"> + </button>
+<button onclick="speed_scale(0.9)"> - </button>
+<button onclick="fn_draw_mode(2)"> Lines </button>
+<button onclick="fn_draw_mode(4)"> Triangles </button>
+<button onclick="fn_draw_mode(0)"> Points </button>
+<p></p>
+
+    FOV : 
+    <input style="width:px" id="fov_range" type="range" min="5" max="50" value="10" oninput="fn_update_fov(this.value);">
+	<input type="text" id="textFOV" value="10">
+<p></p>
+    X-VIEW :
+    <input style="width:800px" id="VX" type="range" min="-100.0" max="100.0" value="-20.0"
+        oninput="ChangeViewX(this.value)">
+    <input type="text" id="changeVX" value="-20.0">
+<p></p>
+    Y-VIEW :
+    <input style="width:800px" id="VY" type="range" min="-100.0" max="100.0" value="20.0"
+        oninput="ChangeViewY(this.value);">
+    <input type="text" id="changeVY" value="20.0">
+<p></p>
+    Z-VIEW :
+    <input style="width:800px" id="VZ" type="range" min="-100.0" max="100.0" value="100.0"
+        oninput="ChangeViewZ(this.value);">
+    <input type="text" id="changeVZ" value="100.0">
+
+<body onload = "explain()">
+    <p id="comm"></p>
+<!DOCTYPE html>
+<html>
+<div>
+    <p>
+
+        <p id="comment">
+        <br><br> 
+            HERE is COMMENT!
+        </p>
+        <br>
+        <br>The length of the side of the figure on the screen is 1. and The length of each cell of the figure on
+        the screen is 1.
+        <br>Select the desired function, and observe the movement of the figure with functions such as fov, view,
+        and toggle
+        animation.
+        <br>Coordinate display may vary depending on the function you select. First, let's study the basic functions
+        such as x-axisrotation, y-axis rotation, and k-axis rotation.
+
+    </p>
+</div>
+<body>
+    <p></p>
+X-axis Rotate:
+    <select id="X-axis Rotate" onchange="mode(this.value),commentFunction()">
+        <option value='x'>------- SELECT -------</option>
+        <option value=0>0. rotateX</option>
+        <option value=''>------Translate + Rotate------</option>
+        <option value=1>1. translate[2,0,0] -> rotateX</option>
+        <option value=2>2. rotateX -> translate[2,0,0]</option>
+        <option value=3>3. translate[0,2,0] -> rotateX</option>
+        <option value=4>4. rotateX -> translate[0,2,0]</option>
+        <option value=5>5. translate[0,0,2] -> rotateX</option>
+        <option value=6>6. rotateX -> translate[0,0,2]</option>
+        <option value=7>7. translate[2,2,0] -> rotateX</option>
+        <option value=8>8. rotateX -> translate[2,2,0]</option>
+        <option value=9>9. translate[2,0,2] -> rotateX</option>
+        <option value=10>10. rotateX -> translate[2,0,2]</option>
+        <option value=11>11. translate[0,2,2] -> rotateX</option>
+        <option value=12>12. rotateX -> translate[0,2,2]</option>
+        <option value=13>13. translate[2,2,2] -> rotateX</option>
+        <option value=14>14. rotateX -> translate[2,2,2]</option>
+        <option value=15>15. translate[2,1,5] -> rotateX</option>
+        <option value=16>16. rotateX -> translate[2,1,5]</option>
+        <option value=''>------- Translate + Scale -------</option>
+        <option value=17>17. scale[1.5,1.5,1] -> translate[2,2,2]</option>
+        <option value=18>18. translate[2,2,2] -> scale[1.5,1.5,1]</option>
+        <option value=19>19. scale[1.5,1,1] -> translate[2,2,2]</option>
+        <option value=20>20. translate[2,2,2] -> scale[1.5,1,1]</option>
+        <option value=21>21. scale[1.5,1.5,1] -> translate[2,2,0]</option>
+        <option value=22>22. translate[2,2,0] -> scale[1.5,1.5,1]</option>
+        <option value=23>23. scale[1.5,1,1] -> translate[2,2,0]</option>
+        <option value=24>24. translate[2,2,0] -> scale[1.5,1,1]</option>
+        <option value=25>25. scale[1.5,1.5,1] -> translate[2,0,0] -> rotateX</option>
+        <option value=26>26. translate[2,0,0] -> scale[1.5,1.5,1]</option>
+        <option value=27>27. scale[1.5,1,1] -> translate[2,0,0] -> rotateX</option>
+        <option value=28>28. translate[2,0,0] -> scale[1.5,1,1]rotateX</option>
+        <option value=''>------- Rotate + Scale -------</option>
+        <option value=29>29. rotateX - > scale[1.5,1,1]</option>
+        <option value=30>30. scale[1.5,1,1] -> rotateX</option>
+        <option value=31>31. rotateX - > scale[1,1.5,1]</option>
+        <option value=32>32. scale[1,1.5,1] -> rotateX</option>
+        <option value=33>33. rotateX - > scale[1,1,1.5]</option>
+        <option value=34>34. scale[1,1,1.5] -> rotateX</option>
+    </select>
+
+Y-axis Rotate:
+    <select id="Y-axis Rotate" onchange="mode(this.value),commentFunction()">
+        <option value=''>------- SELECT -------</option>
+        <option value=35>0. rotateY</option>
+        <option value=''>------Translate + Rotate------</option>
+        <option value=36>1. translate[2,0,0] -> rotateY</option>
+        <option value=37>2. rotateY -> translate[2,0,0]</option>
+        <option value=38>3. translate[0,2,0] -> rotateY</option>
+        <option value=39>4. rotateY -> translate[0,2,0]</option>
+        <option value=40>5. translate[0,0,2] -> rotateY</option>
+        <option value=41>6. rotateY -> translate[0,0,2]</option>
+        <option value=42>7. translate[2,2,0] -> rotateY</option>
+        <option value=43>8. rotateY -> translate[2,2,0]</option>
+        <option value=44>9. translate[2,0,2] -> rotateY</option>
+        <option value=45>10. rotateY -> translate[2,0,2]</option>
+        <option value=46>11. translate[0,2,2] -> rotateY</option>
+        <option value=47>12. rotateY -> translate[0,2,2]</option>
+        <option value=48>13. translate[2,2,2] -> rotateY</option>
+        <option value=49>14. rotateY -> translate[2,2,2]</option>
+        <option value=50>15. translate[2,1,5] -> rotateY</option>
+        <option value=51>16. rotateY -> translate[2,1,5]</option>
+        <option value=''>------- Translate + Scale -------</option>
+        <option value=52>17. scale[1.5,1.5,1] -> translate[2,2,2]</option>
+        <option value=53>18. translate[2,2,2] -> scale[1.5,1.5,1]</option>
+        <option value=54>19. scale[1.5,1,1] -> translate[2,2,2]</option>
+        <option value=55>20. translate[2,2,2] -> scale[1.5,1,1]</option>
+        <option value=56>21. scale[1.5,1.5,1] -> translate[2,2,0]</option>
+        <option value=57>22. translate[2,2,0] -> scale[1.5,1.5,1]</option>
+        <option value=58>23. scale[1.5,1,1] -> translate[2,2,0]</option>
+        <option value=59>24. translate[2,2,0] -> scale[1.5,1,1]</option>
+        <option value=60>25. scale[1.5,1.5,1] -> translate[2,0,0] -> rotateX</option>
+        <option value=61>26. translate[2,0,0] -> scale[1.5,1.5,1]</option>
+        <option value=62>27. scale[1.5,1,1] -> translate[2,0,0] -> rotateX</option>
+        <option value=63>28. translate[2,0,0] -> scale[1.5,1,1]rotateX</option>
+        <option value=''>------- Rotate + Scale -------</option>
+        <option value=64>29. rotateY - > scale[1.5,1,1]</option>
+        <option value=65>30. scale[1.5,1,1] -> rotateY</option>
+        <option value=66>31. rotateY - > scale[1,1.5,1]</option>
+        <option value=67>32. scale[1,1.5,1] -> rotateY</option>
+        <option value=68>33. rotateY - > scale[1,1,1.5]</option>
+        <option value=69>34. scale[1,1,1.5] -> rotateY</option>
+        </select>
+
+Z-axis Rotate:
+        <select id="Z-axis Rotate" onchange="mode(this.value),commentFunction()">
+            <option value=''>------- SELECT -------</option>
+            <option value=70>0. rotateZ</option>
+            <option value=''>------Translate + Rotate------</option>
+            <option value=71>1. translate[2,0,0] -> rotateZ</option>
+            <option value=72>2. rotateZ -> translate[2,0,0]</option>
+            <option value=73>3. translate[0,2,0] -> rotateZ</option>
+            <option value=74>4. rotateZ -> translate[0,2,0]</option>
+            <option value=75>5. translate[0,0,2] -> rotateZ</option>
+            <option value=76>6. rotateZ -> translate[0,0,2]</option>
+            <option value=77>7. translate[2,2,0] -> rotateZ</option>
+            <option value=78>8. rotateZ -> translate[2,2,0]</option>
+            <option value=79>9. translate[2,0,2] -> rotateZ</option>
+            <option value=80>10. rotateZ -> translate[2,0,2]</option>
+            <option value=81>11. translate[0,2,2] -> rotateZ</option>
+            <option value=82>12. rotateZ -> translate[0,2,2]</option>
+            <option value=83>13. translate[2,2,2] -> rotateZ</option>
+            <option value=84>14. rotateZ -> translate[2,2,2]</option>
+            <option value=85>15. translate[2,1,5] -> rotateZ</option>
+            <option value=86>16. rotateZ -> translate[2,1,5]</option>
+            <option value=''>------- Translate + Scale -------</option>
+            <option value=87>17. scale[1.5,1.5,1] -> translate[2,2,2]</option>
+            <option value=88>18. translate[2,2,2] -> scale[1.5,1.5,1]</option>
+            <option value=89>19. scale[1.5,1,1] -> translate[2,2,2]</option>
+            <option value=90>20. translate[2,2,2] -> scale[1.5,1,1]</option>
+            <option value=91>21. scale[1.5,1.5,1] -> translate[2,2,0]</option>
+            <option value=92>22. translate[2,2,0] -> scale[1.5,1.5,1]</option>
+            <option value=93>23. scale[1.5,1,1] -> translate[2,2,0]</option>
+            <option value=94>24. translate[2,2,0] -> scale[1.5,1,1]</option>
+            <option value=95>25. scale[1.5,1.5,1] -> translate[2,0,0] -> rotateX</option>
+            <option value=96>26. translate[2,0,0] -> scale[1.5,1.5,1]</option>
+            <option value=97>27. scale[1.5,1,1] -> translate[2,0,0] -> rotateX</option>
+            <option value=98>28. translate[2,0,0] -> scale[1.5,1,1]rotateX</option>
+            <option value=''>------- Rotate + Scale -------</option>
+            <option value=99>29. rotateZ - > scale[1.5,1,1]</option>
+            <option value=100>30. scale[1.5,1,1] -> rotateZ</option>
+            <option value=101>31. rotateZ - > scale[1,1.5,1]</option>
+            <option value=102>32. scale[1,1.5,1] -> rotateZ</option>
+            <option value=103>33. rotateZ - > scale[1,1,1.5]</option>
+            <option value=104>34. scale[1,1,1.5] -> rotateZ</option>
+        </select>
+    </select>
+
+<br><br>
+<br>really good! We have completed the Basic Course.
+<br>Now let's study the special course!
+<br>Choose the features you want!<br>Before we get started, let's take a look at the features of handling tools.
+
+<br>
+<br>
+<br>
+Special Case 1:
+<select id="Case1" onchange="mode(this.value),commentFunction()">
+    <option value=''>------- SELECT -------</option>
+    <option value=105>0. rotateX + rotateY + rotateZ -> translate[2,2,2]</option>
+    <option value=106>1. translate[2,2,2] - > rotateX + rotateY + rotateZ </option>
+    <option value=107>2. rotateX + rotateY -> translate[2,2,2]</option>
+    <option value=108>3. translate[2,2,2] -> rotateX + rotateY</option>
+    <option value=109>4. rotateX + rotateZ -> translate[2,2,2]</option>
+    <option value=110>5. translate[2,2,2] -> rotateX + rotateZ</option>
+    <option value=111>6. rotateY + rotateZ -> translate[2,2,2]</option>
+    <option value=112>7. translate[2,2,2] -> rotateY + rotateZ</option>
+    <option value=113>8. rotateZ -> translate[2,2,0]</option>
+    <option value=114>9. translate[2,0,2] -> rotateZ</option>
+    <option value=115>10. rotateZ -> translate[2,0,2]</option>
+    <option value=116>11. translate[0,2,2] -> rotateZ</option>
+    <option value=117>12. rotateZ -> translate[0,2,2]</option>
+    <option value=118>13. translate[2,2,2] -> rotateZ</option>
+    
+</select>
+
+Special Case 2:
+<select id="Case2" onchange="mode(this.value),commentFunction()">
+    <option value=''>------- SELECT -------</option>
+    <option value=119>0. fromRotation[0.2,0.2,0.2]</option>
+    <option value=120>1. translate[2,0,0] -> fromRotation[0.2,0.2,0.2] </option>
+    <option value=121>2. translate[0,2,0] -> fromRotation[0.2,0.2,0.2]</option>
+    <option value=122>3. translate[0,0,2] -> fromRotation[0.2,0.2,0.2]</option>
+    <option value=123>4. fromRotation[0.2,0.2,0.2]</option>
+    <option value=124>5. translate[2,0,0] -> fromRotation[0.2,0.2,0]</option>
+    <option value=125>6. translate[0,2,0] -> fromRotation[0.2,0.2,0]</option>
+    <option value=126>7. translate[0,0,2] -> fromRotation[0.2,0.2,0]</option>
+    <option value=127>8. fromRotation[0.2,0,0.2]</option>
+    <option value=128>9. translate[2,0,0] -> fromRotation[0.2,0,0.2]</option>
+    <option value=129>10. translate[0,2,0] -> fromRotation[0.2,0,0.2]</option>
+    <option value=130>11. translate[0,0,2] -> fromRotation[0.2,0,0.2]</option>
+    <option value=131>12. fromRotation[0,0.2,0.2]</option>
+    <option value=132>13. translate[2,0,0] -> fromRotation[0,0.2,0.2]</option>
+    <option value=133>13. translate[0,2,0] -> fromRotation[0,0.2,0.2]</option>
+    <option value=134>13. translate[0,0,2] -> fromRotation[0,0.2,0.2]</option>
+    
+</select>
+
+
+</select>
+
+Special Case 3:
+<select id="Case3" onchange="mode(this.value),commentFunction()">
+    <option value=''>------- SELECT -------</option>
+    <option value=135>0. translate[-0.5,-0.5,-0.5] -> rotateX + rotateY + rotateZ -> translate[0.5,0.5,0.5]</option>
+    <option value=136>1. translate[-0.5,-0.5,-0.5] -> rotateX + rotateY -> translate[0.5,0.5,0.5]</option>
+    <option value=137>2. translate[-0.5,-0.5,-0.5] -> rotateX + rotateZ -> translate[0.5,0.5,0.5]</option>
+    <option value=138>3. translate[-0.5,-0.5,-0.5] -> rotateY + rotateZ -> translate[0.5,0.5,0.5]</option>
+    <option value=139>4. translate[-0.5,0,0] -> rotateX + rotateY + rotateZ -> translate[0.5,0,0]</option>
+    <option value=140>5. translate[-0,-0.5,0] -> rotateX + rotateY + rotateZ -> translate[0,0.5,0]</option>
+    <option value=141>6. translate[-0,-0,-0.5] -> rotateX + rotateY + rotateZ -> translate[0,0,0.5]</option>
+    
+</select>
+
+<p><br> really good! Now let's start practicing!
+   
+    <br>Study various cases and special cases through various combinations. 
+    <br>And predict the shape's position!
+    <br>The order of the commands is from top to bottom.
+</p><br>
+
+rotateX : 
+<select id="rotateX1" onchange="rotateX1(this.value)">
+    <option value=''>--SELECT--</option>
+    <option value=1>rotateX </option>
+    <option value=0>off </option>
+</select>
+rotateY :
+<select id="rotateY1" onchange="rotateY1(this.value)">
+    <option value=''>--SELECT--</option>
+    <option value=1>rotateY </option>
+    <option value=0>off </option>
+</select>
+rotateZ :
+<select id="rotateZ1" onchange="rotateZ1(this.value)">
+    <option value=''>--SELECT--</option>
+    <option value=1>rotateZ </option>
+    <option value=0>off </option>
+</select>
+<p></p>
+<label for="ScaleX1">Scale X,Y,Z: (/5)</label>
+
+<input id='ScaleX1' onchange='PscaleX1()' maxlength="1" size="2" />
+<input id='ScaleY1' onchange='PscaleY1()' maxlength="1" size="2" />
+<input id='ScaleZ1' onchange='PscaleZ1()' maxlength="1" size="2" />
+<p></p>
+<label for="Translate1">Translate X,Y,Z:</label>
+
+<input id='TranslateX1' onchange='PTranslateX1()' maxlength="1" size="2" />
+<input id='TranslateY1' onchange='PTranslateY1()' maxlength="1" size="2" />
+<input id='TranslateZ1' onchange='PTranslateZ1()' maxlength="1" size="2" />
+<p></p>
+<label for="ScaleX2">Scale X,Y,Z: (/5)</label>
+
+<input id='ScaleX2' onchange='PscaleX2()' maxlength="1" size="2" />
+<input id='ScaleY2' onchange='PscaleY2()' maxlength="1" size="2" />
+<input id='ScaleZ2' onchange='PscaleZ2()' maxlength="1" size="2" />
+
+
+<p></p>
+<label for="fromRotationX1">fromRotation X,Y,Z: (/20)</label>
+
+<input id='fromRotationX1' onchange='fromRotationX1()' maxlength="1" size="2" />
+<input id='fromRotationY1' onchange='fromRotationY1()' maxlength="1" size="2" />
+<input id='fromRotationZ1' onchange='fromRotationZ1()' maxlength="1" size="2" />
+
+<p></p>
+
+rotateX :
+<select id="rotateX2" onchange="rotateX2(this.value)">
+    <option value=''>--SELECT--</option>
+    <option value=1>rotateX </option>
+    <option value=0>off </option>
+</select>
+rotateY :
+<select id="rotateY2" onchange="rotateY2(this.value)">
+    <option value=''>--SELECT--</option>
+    <option value=1>rotateY </option>
+    <option value=0>off </option>
+</select>
+rotateZ :
+<select id="rotateZ2" onchange="rotateZ2(this.value)">
+    <option value=''>--SELECT--</option>
+    <option value=1>rotateZ </option>
+    <option value=0>off </option>
+</select>
+<p></p>
+<label for="fromRotationX2">fromRotation X,Y,Z: (/20)</label>
+
+<input id='fromRotationX2' onchange='fromRotationX2()' maxlength="1" size="2" />
+<input id='fromRotationY2' onchange='fromRotationY2()' maxlength="1" size="2" />
+<input id='fromRotationZ2' onchange='fromRotationZ2()' maxlength="1" size="2" />
+
+
+<p></p>
+<label for="ScaleX3">Scale X,Y,Z: (/5)</label>
+
+<input id='ScaleX3' onchange='PscaleX3()' maxlength="1" size="2" />
+<input id='ScaleY3' onchange='PscaleY3()' maxlength="1" size="2" />
+<input id='ScaleZ3' onchange='PscaleZ3()' maxlength="1" size="2" />
+
+<p></p>
+<label for="Translate2">Translate X,Y,Z:</label>
+
+<input id='TranslateX2' onchange='PTranslateX2()' maxlength="1" size="2" />
+<input id='TranslateY2' onchange='PTranslateY2()' maxlength="1" size="2" />
+<input id='TranslateZ2' onchange='PTranslateZ2()' maxlength="1" size="2" />
+
+<p></p>
+
+<label for="ScaleX4">Scale X,Y,Z: (/5)</label>
+
+<input id='ScaleX4' onchange='PscaleX4()' maxlength="1" size="2" />
+<input id='ScaleY4' onchange='PscaleY4()' maxlength="1" size="2" />
+<input id='ScaleZ4' onchange='PscaleZ4()' maxlength="1" size="2" />
+
+<p></p>
+<p id="try"></p>
+<button type="button" onclick="Try(),commentFunction()">Try it</button>
+
+    </script>
+    </head>
+    
+    <body>
+    
+        
+    
+
+</html>

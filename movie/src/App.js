@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";//PropTypes 모듈을 이용하여 변수형이 다를경우 콘솔에 에러메시지 할당 but 예제 실행시 작동이 안되는것 같다.
 import axios from "axios";//fatch의 상위레이어개념
 import Movie from "./Movies"//동일폴더에 존재하는 파일 import
-  
+import './index.css';
 
   class App extends React.Component{//componet를 extend한 class App생성
     state = {
