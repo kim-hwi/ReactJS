@@ -1,0 +1,11 @@
+{
+  "AppSyncApiName": "mtovdpecofms2021",
+  "DynamoDBBillingMode": "PAY_PER_REQUEST",
+  "DynamoDBEnableServerSideEncryption": false,
+  "AuthCognitoUserPoolId": {
+    "Fn::GetAtt": [
+      "authmtovdpecofms2021fc708274fc708274",
+      "Outputs.UserPoolId"
+    ]
+  }
+}
